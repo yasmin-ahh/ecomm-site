@@ -1,6 +1,6 @@
 # ecomm-site
 
-This is a site for adding food items and adding items to cart. 
+This is a site for adding any item and adding items to cart. 
 
 This project includes:
 * Adding items and setting up cart functionality
