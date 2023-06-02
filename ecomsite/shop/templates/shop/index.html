@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+    <div class="container">
+        {% include 'shop/navBar.html' %}
+        <div class="row">
+            <div class="col-md-12">
+                <form class="card card-sm">
+                    <div class="card-body row no-gutters align-items-center">
+                        <div class="col">
+                            <input type="search" name="item_name" placeholder="Search for Products" class="form-control form-control-borderless">
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-success" type="submit"> Search </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            {% for product in products_objects %}
+            <div class="col-md-3">
+            <div class="card">
+                <img src="{{ product.image }}" id="{{product.id}}_img" class="img-prod">
+                <div class="card-body">
+                    <div id="{{product.id}}_title" class="card-title">{{ product.title }}</div>
+                    <div class="card-text" id="{{product.id}}_price"> ${{ product.price }} </div>
+                    <br>
+                    <button class="btn btn-warning">
+                        <a href="/{{ product.id }}">View </a>
+                    </button>
+                    <button id="{{product.id}}" class="btn atc btn btn-warning">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-3 offset -m4-4">
+                <ul class="pagination">
+                    {% if products_objects.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products_objects.previous_page_number }}"> Previous </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{ products_objects.number }}"> Cuurent </a>
+                    </li>
+                    <br>
+
+                    {% if products_objects.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products_objects.next_page_number }}"> Next </a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+    if (!localStorage.getItem('cart')) {
+        var cart = {};
+    }
+    else {
+        cart = JSON.parse(localStorage.getItem('cart'));
+    }
+
+    document.getElementById("cartnum").innerHTML =  "("+Object.keys(cart).length+")";
+
+    $(document).on('click', '.atc', function()
+    {
+        var item_id = this.id.toString();
+        price = parseFloat(document.getElementById(item_id+"_price").innerHTML.replace('$',''));
+        imgSrc = document.getElementById(item_id+"_img").src;
+        if(cart[item_id] != undefined) {
+            quantity = cart[item_id][0] + 1;
+            cart[item_id][0] = quantity;
+            cart[item_id][2] = cart[item_id][2] + price;
+            cart[item_id][3] = imgSrc;
+        }
+        else {
+            quantity = 1;
+            name = document.getElementById(item_id+"_title").innerHTML;
+            cart[item_id] = [quantity, name, price, imgSrc];
+        }
+        console.log("cart is ", cart);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        document.getElementById("cartnum").innerHTML =  "("+Object.keys(cart).length+")";
+    });
+    $(document).ready(function () {
+            //initialize popover
+            var popover = new bootstrap.Popover(document.querySelector('#cart'), {
+            container: 'body'
+            })
+            const popoverTriggerList = document.querySelectorAll('[data-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            // document.getElementById("cart").setAttribute('data-content', '<h4> this is a cart </h4>');
+        });
+    DisplayCart(cart);
+    function DisplayCart(cart) {
+        var cartString = "";
+        cartString += "<h4> Cart Items  </h4>";
+
+        cartObject = JSON.parse(localStorage.getItem('cart'));
+
+        for (var x in cartObject){
+            cartString += "<div class=\"card card-pop\">" + "<div> <img src=\"" + cartObject[x][3] +"\" class=\"img-popover\"> </div>" + "<div class=\"cart-text\">"+ cartObject[x][1] + "  x " + cartObject[x][0]+ "</div>" + "</div>" + "</br>";
+        }
+        cartString += "</br> <a href='/checkout'> <button class='btn btn-warning' id='checkout'>Checkout </button> </a>"
+        document.getElementById("cart").setAttribute('data-content', cartString);
+    }
+</script>
+
+</html>
